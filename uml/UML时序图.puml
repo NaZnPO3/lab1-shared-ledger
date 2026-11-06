@@ -1,0 +1,41 @@
+@startuml UML时序图
+' 多人共享记账系统 —— 时序图：管理员审核一条收支记录
+skinparam defaultFontName "Microsoft YaHei"
+skinparam shadowing false
+autonumber
+
+actor "管理员" as A
+participant "审核中心界面" as UI
+participant "审核与更正服务" as SVC
+participant "认证与权限服务" as AUTH
+participant "收支记录" as DB
+participant "操作日志服务" as LOG
+
+A -> UI : 打开发起审核（recordId，审核结论）
+UI -> SVC : 提交审核请求(recordId, 结论, 会话令牌)
+
+SVC -> AUTH : 校验当前成员的账本角色
+AUTH --> SVC : 角色 = 管理员（校验通过）
+
+SVC -> DB : 读取记录当前状态
+DB --> SVC : 状态 = 待审核
+
+alt 状态仍为“待审核”
+  SVC -> SVC : 校验所属结算周期未锁定
+  SVC -> DB : 更新状态为 已审核 / 已驳回
+  DB --> SVC : 更新成功
+  SVC -> LOG : 记录审核操作（操作人、结论、时间）
+  SVC --> UI : 审核成功
+  UI --> A : 列表刷新，记录移出待审核
+else 状态已被他人改变
+  SVC -> LOG : 记录审核失败（状态已变化）
+  SVC --> UI : 返回“记录状态已变化”
+  UI --> A : 提示刷新后重试，不重复审核
+end
+
+note over SVC, DB
+  审核在同一事务内完成“状态校验 + 更新”，
+  两个管理员并发审核时只有一个能成功
+end note
+
+@enduml

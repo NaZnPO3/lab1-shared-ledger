@@ -1,0 +1,52 @@
+@startuml UML组件图
+' 多人共享记账系统 —— 分层组件图
+skinparam defaultFontName "Microsoft YaHei"
+skinparam componentStyle rectangle
+skinparam shadowing false
+top to bottom direction
+
+package "表现层" as PL {
+  [记账客户端\n（Web / 小程序）] as UI
+}
+
+package "接入层" as GW {
+  [API 网关\n会话校验 · 权限拦截 · 幂等键] as API
+}
+
+package "应用服务层" as SVC {
+  [认证与权限服务] as Auth
+  [账本与成员服务] as LedgerSvc
+  [收支记录服务] as RecordSvc
+  [审核与更正服务] as AuditSvc
+  [统计与预算服务] as StatSvc
+  [周期结算服务] as SettleSvc
+  [操作日志服务] as LogSvc
+}
+
+package "数据层" as DATA {
+  database "业务数据库\n账本 / 记录 / 结算" as DB
+  database "操作日志库\n（只追加）" as LOGDB
+}
+
+UI --> API : HTTPS / JSON
+API --> Auth : 校验会话
+API --> SVC : 路由到业务服务
+SVC --> DATA : 读写
+
+LedgerSvc ..> RecordSvc : 校验成员权限
+AuditSvc ..> RecordSvc : 更新记录状态
+StatSvc ..> RecordSvc : 读取已审核记录
+SettleSvc ..> RecordSvc : 汇总周期内记录
+
+RecordSvc ..> LogSvc : 撤回 / 作废留痕
+AuditSvc ..> LogSvc : 审核 / 越权留痕
+SettleSvc ..> LogSvc : 结算结果 / 失败原因
+LogSvc --> LOGDB
+
+note right of SettleSvc
+  结算是一个事务：
+  任一环节失败即整体回滚，
+  并写入失败日志
+end note
+
+@enduml

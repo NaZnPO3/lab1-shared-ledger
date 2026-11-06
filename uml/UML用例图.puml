@@ -1,0 +1,49 @@
+@startuml UML用例图
+' 多人共享记账系统 —— 用例图（按三类角色划分）
+skinparam defaultFontName "Microsoft YaHei"
+skinparam shadowing false
+left to right direction
+
+actor "普通成员" as M
+actor "账本管理员" as A
+actor "只读成员" as R
+
+rectangle "多人共享记账系统" {
+  usecase "登录 / 注册" as UC1
+  usecase "新增收支记录" as UC2
+  usecase "撤回本人待审核记录" as UC3
+  usecase "提交已审核记录的更正" as UC4
+  usecase "按条件查询记录" as UC5
+  usecase "审核 / 驳回记录" as UC6
+  usecase "作废已审核记录" as UC7
+  usecase "创建账本并邀请成员" as UC8
+  usecase "设置成员角色与权限" as UC9
+  usecase "查看分类与成员统计" as UC10
+  usecase "发起周期结算" as UC11
+  usecase "查看操作日志" as UC12
+}
+
+M --> UC1
+M --> UC2
+M --> UC3
+M --> UC4
+M --> UC5
+
+A --> UC6
+A --> UC7
+A --> UC8
+A --> UC9
+A --> UC10
+A --> UC11
+A --> UC12
+
+R --> UC1
+R --> UC5
+R --> UC10
+
+note bottom of R
+  只读成员不能新增、修改、
+  撤回、审核或作废记录
+end note
+
+@enduml
