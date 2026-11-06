@@ -1,94 +1,81 @@
 @startuml UML类图
-' 多人共享记账系统 —— 核心领域类图（只保留核心实体）
+' 多人共享记账系统 —— 核心领域类图
+' 说明：字段前的 - 表示 private，方法前的 + 表示 public（UML 可见性标记）
 skinparam defaultFontName "Microsoft YaHei"
 skinparam classAttributeIconSize 0
-skinparam packageStyle rectangle
 skinparam shadowing false
+skinparam nodesep 45
+skinparam ranksep 55
 hide circle
 hide empty members
 
-package "账本与成员" {
-  class User {
-    - userId : String
-    - 账号 : String
-    - 昵称 : String
-    + 注册()
-    + 登录()
-  }
-
-  class Ledger {
-    - ledgerId : String
-    - 名称 : String
-    - 金额上限 : Decimal
-    + 创建账本()
-    + 邀请成员()
-  }
-
-  class Member {
-    - memberId : String
-    - 角色 : MemberRole
-    - 状态 : 在册/已退出
-    + 变更角色()
-    + 退出账本()
-  }
+class User {
+  - userId : String
+  - 账号 : String
+  - 昵称 : String
+  + 注册()
+  + 登录()
 }
 
-package "收支记录" {
-  class TransactionRecord {
-    - recordId : String
-    - 金额 : Decimal
-    - 收支类型 : 收入/支出
-    - 发生日期 : Date
-    - 备注 : String
-    - 状态 : RecordStatus
-    + 提交()
-    + 撤回()
-    + 修改后重提()
-    + 审核通过()
-    + 审核驳回()
-    + 作废()
-  }
-
-  class Category {
-    - categoryId : String
-    - 名称 : String
-    - 适用类型 : 收入/支出
-  }
+class Ledger {
+  - ledgerId : String
+  - 名称 : String
+  - 金额上限 : Decimal
+  + 创建账本()
+  + 邀请成员()
 }
 
-package "结算与统计" {
-  class SettlementPeriod {
-    - periodId : String
-    - 起止日期 : DateRange
-    - 状态 : 进行中/已结算
-    + 结算()
-    + 锁定()
-  }
-
-  class Budget {
-    - budgetId : String
-    - 周期 : 月/季
-    - 限额 : Decimal
-    + 累计支出()
-  }
+class Member {
+  - memberId : String
+  - 角色 : 创建者/管理员/成员/只读
+  - 状态 : 在册/已退出
+  + 变更角色()
+  + 退出账本()
 }
 
-package "审计" {
-  class OperationLog {
-    - logId : String
-    - 操作类型 : String
-    - 发生时间 : DateTime
-    - 处理结果 : String
-    + 记录()
-    + 查询()
-  }
+class Category {
+  - categoryId : String
+  - 名称 : String
+  - 适用类型 : 收入/支出
 }
 
-enum MemberRole {
-  账本创建者
-  管理员
-  普通成员
-  只读成员
+class TransactionRecord {
+  - recordId : String
+  - 金额 : Decimal
+  - 收支类型 : 收入/支出
+  - 发生日期 : Date
+  - 备注 : String
+  - 状态 : RecordStatus
+  + 提交()
+  + 撤回()
+  + 修改后重提()
+  + 审核通过()
+  + 审核驳回()
+  + 作废()
+}
+
+class SettlementPeriod {
+  - periodId : String
+  - 起止日期 : DateRange
+  - 状态 : 进行中/已结算
+  + 结算()
+  + 锁定()
+}
+
+class Budget {
+  - budgetId : String
+  - 周期 : 月/季
+  - 限额 : Decimal
+  + 累计支出()
+}
+
+class OperationLog {
+  - logId : String
+  - 操作类型 : String
+  - 发生时间 : DateTime
+  - 处理结果 : String
+  + 记录()
+  + 查询()
 }
 
 enum RecordStatus {
@@ -99,24 +86,17 @@ enum RecordStatus {
   已作废
 }
 
-User "1" -- "0..*" Member : 以成员身份参与
+User "1" -- "0..*" Member : 参与
 Ledger "1" -- "1..*" Member : 拥有
 Member "1" -- "0..*" TransactionRecord : 记录
 Ledger "1" -- "0..*" TransactionRecord : 归属
-Ledger "1" -- "0..*" SettlementPeriod : 划分周期
-Ledger "1" -- "0..*" Budget : 设置
 Ledger "1" -- "0..*" Category : 维护
 Category "1" -- "0..*" TransactionRecord : 归类
+Ledger "1" -- "0..*" SettlementPeriod : 划分
 SettlementPeriod "1" -- "0..*" TransactionRecord : 包含
+Ledger "1" -- "0..1" Budget : 设置
 TransactionRecord "0..1" --> "0..1" TransactionRecord : 更正原记录
 TransactionRecord "1" -- "0..*" OperationLog : 留痕
-Member ..> MemberRole
 TransactionRecord ..> RecordStatus
-
-note bottom of TransactionRecord
-  已审核记录不可直接修改：
-  由原记录人提交一条指向它的
-  更正记录，审核通过后原记录作废
-end note
 
 @enduml

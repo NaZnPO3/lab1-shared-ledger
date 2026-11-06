@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>界面1 登录注册</title>
+<link rel="stylesheet" href="ui.css">
+<style>
+  body { display: flex; align-items: center; justify-content: center; height: 900px; background: radial-gradient(1100px 620px at 22% 18%, #1b2740 0%, #0e1015 62%); }
+  .login { display: flex; width: 980px; height: 560px; background: var(--panel); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,.55); }
+  .left { flex: 1; padding: 54px 46px; background: linear-gradient(160deg, #16233a 0%, #101620 100%); display: flex; flex-direction: column; }
+  .left .brand { padding: 0; }
+  .left h1 { font-size: 28px; line-height: 1.5; margin-top: 48px; letter-spacing: .5px; }
+  .left p { color: var(--muted); margin-top: 16px; line-height: 1.9; font-size: 13.5px; }
+  .left ul { margin-top: 30px; list-style: none; display: flex; flex-direction: column; gap: 12px; color: var(--muted); font-size: 13px; }
+  .left li::before { content: "●"; color: var(--income); font-size: 9px; margin-right: 9px; vertical-align: 2px; }
+  .right { width: 400px; flex: none; padding: 54px 42px; display: flex; flex-direction: column; }
+  .tabs { display: flex; gap: 22px; border-bottom: 1px solid var(--line); padding-bottom: 14px; margin-bottom: 26px; }
+  .tabs div { font-size: 15px; color: var(--dim); cursor: pointer; }
+  .tabs div.on { color: var(--text); font-weight: 700; position: relative; }
+  .tabs div.on::after { content: ""; position: absolute; left: 0; right: 0; bottom: -15px; height: 2px; background: var(--accent); border-radius: 2px; }
+  label { display: block; font-size: 12px; color: var(--muted); margin: 16px 0 7px; }
+  input { width: 100%; padding: 11px 13px; border-radius: 9px; border: 1px solid var(--line); background: var(--panel-2); color: var(--text); font-size: 13.5px; font-family: inherit; }
+  input::placeholder { color: var(--dim); }
+  .btn.primary { width: 100%; margin-top: 26px; padding: 12px; font-size: 14px; }
+  .hint { margin-top: 18px; font-size: 12px; color: var(--dim); text-align: center; }
+  .hint a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+  <div class="login">
+    <div class="left">
+      <div class="brand">
+        <div class="logo">记</div>
+        <div>
+          <div class="name">共享账本</div>
+        </div>
+      </div>
+      <h1>多人共享账本</h1>
+      <p></p>
+      <ul>
+        <li>成员：管理员 / 普通成员 / 只读成员</li>
+        <li>记录状态：待审核 / 已审核 / 已驳回 / 已作废</li>
+        <li>包含日志</li>
+      </ul>
+    </div>
+    <div class="right">
+      <div class="tabs">
+        <div class="on">登录</div>
+        <div>注册</div>
+      </div>
+      <label>账号</label>
+      <input value="114514" placeholder="手机号或邮箱">
+      <label>密码</label>
+      <input type="password" value="········" placeholder="请输入密码">
+      <button class="btn primary">登 录</button>
+      <div class="hint">还没有账号？<a href="#">立即注册</a></div>
+      <div class="hint" style="margin-top:auto">登录即表示同意《用户协议》</div>
+    </div>
+  </div>
+</body>
+</html>

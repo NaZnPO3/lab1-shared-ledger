@@ -1,8 +1,11 @@
 @startuml UML组件图
-' 多人共享记账系统 —— 分层组件图
+' 多人共享记账系统 —— 分层组件图（6 个服务与 M1~M6 一一对应）
 skinparam defaultFontName "Microsoft YaHei"
 skinparam componentStyle rectangle
 skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 30
+skinparam ranksep 50
 top to bottom direction
 
 package "表现层" as PL {
@@ -14,39 +17,30 @@ package "接入层" as GW {
 }
 
 package "应用服务层" as SVC {
-  [认证与权限服务] as Auth
-  [账本与成员服务] as LedgerSvc
-  [收支记录服务] as RecordSvc
-  [审核与更正服务] as AuditSvc
-  [统计与预算服务] as StatSvc
-  [周期结算服务] as SettleSvc
-  [操作日志服务] as LogSvc
+  [认证与权限服务] as M1
+  [账本与成员服务] as M2
+  [收支记录服务] as M3
+  [审核与更正服务] as M4
+  [统计与预算服务] as M5
+  [结算与日志服务] as M6
 }
 
-package "数据层" as DATA {
-  database "业务数据库\n账本 / 记录 / 结算" as DB
-  database "操作日志库\n（只追加）" as LOGDB
+package "数据访问层" as DAL {
+  [数据访问组件\n事务 · 幂等键 · 审计写入] as DAO
 }
+
+database "业务数据库\n账本 / 记录 / 结算" as DB
+database "操作日志库\n（只追加）" as LOGDB
 
 UI --> API : HTTPS / JSON
-API --> Auth : 校验会话
-API --> SVC : 路由到业务服务
-SVC --> DATA : 读写
+API --> SVC : 鉴权后路由
+SVC --> DAL
+DAO --> DB : 读写
+DAO --> LOGDB : 追加写入
 
-LedgerSvc ..> RecordSvc : 校验成员权限
-AuditSvc ..> RecordSvc : 更新记录状态
-StatSvc ..> RecordSvc : 读取已审核记录
-SettleSvc ..> RecordSvc : 汇总周期内记录
-
-RecordSvc ..> LogSvc : 撤回 / 作废留痕
-AuditSvc ..> LogSvc : 审核 / 越权留痕
-SettleSvc ..> LogSvc : 结算结果 / 失败原因
-LogSvc --> LOGDB
-
-note right of SettleSvc
-  结算是一个事务：
-  任一环节失败即整体回滚，
-  并写入失败日志
-end note
+M4 ..> M3 : 回写状态
+M6 ..> M3 : 汇总周期记录
+M3 ..> M6 : 写日志
+M5 ..> M3 : 读已审核记录
 
 @enduml

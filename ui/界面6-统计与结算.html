@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>界面6 统计与结算</title>
+<link rel="stylesheet" href="ui.css">
+<style>
+  .wrap { display: flex; gap: 16px; }
+  .left { flex: 1; min-width: 0; }
+  .right { width: 372px; flex: none; }
+
+  .kpi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 16px; }
+  .kpi > div { background: var(--panel); border: 1px solid var(--line); border-radius: 13px; padding: 15px 17px; }
+  .kpi .k { font-size: 12px; color: var(--muted); }
+  .kpi .v { font-size: 22px; font-weight: 700; margin-top: 8px; font-variant-numeric: tabular-nums; }
+
+  .cat-row { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+  .cat-row .nm { width: 96px; font-size: 13px; }
+  .cat-row .track { flex: 1; height: 10px; background: var(--panel-3); border-radius: 6px; overflow: hidden; }
+  .cat-row .track i { display: block; height: 100%; border-radius: 6px; }
+  .cat-row .amt { width: 96px; text-align: right; font-size: 13px; font-variant-numeric: tabular-nums; }
+  .cat-row .pct { width: 44px; text-align: right; font-size: 12px; color: var(--dim); }
+
+  .legend { display: flex; gap: 16px; font-size: 11.5px; color: var(--dim); margin-top: 8px; }
+
+  .settle { background: linear-gradient(140deg, #1a2c46, #141a24); border: 1px solid rgba(79,140,255,.3); border-radius: 14px; padding: 20px; }
+  .settle .hd { display: flex; align-items: center; gap: 9px; }
+  .settle .hd .t { font-size: 14px; font-weight: 700; }
+  .settle .period { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .settle .big { font-size: 30px; font-weight: 700; margin: 16px 0 4px; font-variant-numeric: tabular-nums; }
+  .settle .sub { font-size: 11.5px; color: var(--dim); }
+  .settle .prog { height: 6px; background: rgba(255,255,255,.09); border-radius: 5px; margin: 16px 0 6px; overflow: hidden; }
+  .settle .prog i { display: block; height: 100%; width: 20%; background: var(--accent); border-radius: 5px; }
+  .settle .acts { display: flex; gap: 9px; margin-top: 18px; }
+  .settle .acts .btn { flex: 1; }
+
+  .hist { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid rgba(43,50,64,.6); font-size: 12.5px; }
+  .hist:last-child { border-bottom: none; }
+  .hist .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--income); }
+  .hist .dot.lock { background: var(--dim); }
+  .hist .r { margin-left: auto; color: var(--dim); font-size: 11.5px; }
+
+  .bal { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid rgba(43,50,64,.6); font-size: 12.5px; }
+  .bal:last-child { border-bottom: none; }
+  .bal .avatar { width: 26px; height: 26px; font-size: 10px; }
+  .bal .v { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .bal .v.pos { color: var(--income); }
+  .bal .v.neg { color: var(--expense); }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo">记</div><div><div class="name">共享账本</div><div class="sub">114514</div></div></div>
+    <nav class="nav">
+      <div class="group">工作区</div>
+      <a href="#"><span class="ico"></span>我的账本</a>
+      <a href="#"><span class="ico"></span>账本总览</a>
+      <a href="#"><span class="ico"></span>记账</a>
+      <a href="#"><span class="ico"></span>记录明细</a>
+      <a href="#"><span class="ico"></span>审核<span class="badge">5</span></a>
+      <a class="active" href="#"><span class="ico"></span>统计与结算</a>
+      <div class="group">管理</div>
+      <a href="#"><span class="ico"></span>成员与权限</a>
+      <a href="#"><span class="ico"></span>操作日志</a>
+    </nav>
+    <div class="foot">v0.1</div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="title">统计与结算</div>
+      <span class="chip role">管理员</span>
+      <div class="spacer"></div>
+      <span class="chip">2026-11-01 ~ 11-30</span>
+      <select class="chip" style="background:var(--panel-3);border:1px solid var(--line);color:var(--muted)"><option>按类别</option><option>按成员</option></select>
+      <div class="avatar">1</div>
+    </header>
+
+    <div class="content">
+      <div class="wrap">
+        <div class="left">
+          <div class="kpi">
+            <div><div class="k">本期收入</div><div class="v up">¥ 9,600.00</div></div>
+            <div><div class="k">本期支出</div><div class="v down">¥ 5,779.50</div></div>
+            <div><div class="k">纳入统计</div><div class="v">32 笔</div></div>
+          </div>
+
+          <div class="card" style="margin-bottom:16px">
+            <h3>分类支出统计（仅统计已审核记录）</h3>
+            <div class="cat-row">
+              <div class="nm">房租水电</div>
+              <div class="track"><i style="width:100%;background:linear-gradient(90deg,#4f8cff,#7aa8ff)"></i></div>
+              <div class="amt num">¥ 2,400.00</div><div class="pct num">42%</div>
+            </div>
+            <div class="cat-row">
+              <div class="nm">餐饮</div>
+              <div class="track"><i style="width:62%;background:linear-gradient(90deg,#2ecc8f,#5fe0b0)"></i></div>
+              <div class="amt num">¥ 1,486.00</div><div class="pct num">26%</div>
+            </div>
+            <div class="cat-row">
+              <div class="nm">日用</div>
+              <div class="track"><i style="width:38%;background:linear-gradient(90deg,#f5b544,#ffcf7a)"></i></div>
+              <div class="amt num">¥ 912.50</div><div class="pct num">16%</div>
+            </div>
+            <div class="cat-row">
+              <div class="nm">交通</div>
+              <div class="track"><i style="width:26%;background:linear-gradient(90deg,#a06bff,#c49bff)"></i></div>
+              <div class="amt num">¥ 620.00</div><div class="pct num">11%</div>
+            </div>
+            <div class="cat-row" style="margin-bottom:0">
+              <div class="nm">娱乐</div>
+              <div class="track"><i style="width:13%;background:linear-gradient(90deg,#ff6b6b,#ff9d9d)"></i></div>
+              <div class="amt num">¥ 361.00</div><div class="pct num">5%</div>
+            </div>
+            <div class="legend"><span>※ 已驳回、已撤回、已作废的记录不计入统计</span></div>
+          </div>
+
+          <div class="card">
+            <h3>成员结算结果（本期预览，未锁定）</h3>
+            <div class="bal"><div class="avatar">ZH</div><span>张昊</span><span class="v neg">-¥ 486.50</span></div>
+            <div class="bal"><div class="avatar">WM</div><span>王敏</span><span class="v pos">+¥ 212.00</span></div>
+            <div class="bal"><div class="avatar">1</div><span>114514</span><span class="v pos">+¥ 180.50</span></div>
+            <div class="bal"><div class="avatar">LC</div><span>李晨</span><span class="v pos">+¥ 94.00</span></div>
+            <div class="legend"><span>负数表示应向其他人支付，正数表示应收回</span></div>
+          </div>
+        </div>
+
+        <div class="right col">
+          <div class="settle">
+            <div class="hd"><span style="color:var(--accent)">◷</span><div class="t">本期结算</div><span class="tag wait" style="margin-left:auto">进行中</span></div>
+            <div class="period">第 3 期 · 2026-11-01 ~ 2026-11-30 · 每月自动结算</div>
+            <div class="big">¥ 3,820.50</div>
+            <div class="sub">本期结余，结算后本期记录将被锁定</div>
+            <div class="prog"><i></i></div>
+            <div class="sub">已过去 6 天 / 共 30 天</div>
+            <div class="acts">
+              <button class="btn">修改周期</button>
+              <button class="btn primary">立即结算</button>
+            </div>
+            <div class="sub" style="margin-top:12px">结算为一次事务：任一环节失败将整体回滚，并记录失败原因与操作人。</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>
