@@ -17,7 +17,7 @@ python main.py
 验证与质量检查：
 
 ```powershell
-python -m pytest -q                      # 82 个测试
+python -m pytest -q                      # 87 个测试（含 5 个界面回归用例）
 python -m pylint ledgershare tests tools # 代码风格检查，当前 10.00/10
 python tools/capture_ui.py               # 生成界面截图到 ../docs/screenshots
 ```

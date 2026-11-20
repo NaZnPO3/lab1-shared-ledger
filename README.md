@@ -38,7 +38,7 @@ lab1-shared-ledger/
 cd code
 python -m pip install -r requirements.txt
 python main.py                        # 启动桌面程序
-python -m pytest                      # 82 个测试全部通过
+python -m pytest                      # 87 个测试全部通过
 python -m pylint ledgershare tests tools   # 代码风格检查 10.00/10
 python build.py                       # 打包 dist/LedgerShare.exe
 ```
