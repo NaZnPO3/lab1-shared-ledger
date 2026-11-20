@@ -1,0 +1,47 @@
+[project]
+name = "ledgershare"
+version = "1.0.0"
+description = "轻量级 Windows 桌面多人共享记账软件（软件工程实验三）"
+requires-python = ">=3.11"
+dependencies = ["PySide6>=6.5"]
+
+[project.scripts]
+ledgershare = "ledgershare.ui.app:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q --strict-markers"
+filterwarnings = ["error::DeprecationWarning"]
+
+[tool.pylint.main]
+py-version = "3.13"
+jobs = 0
+# PySide6 是编译扩展，pylint 无法静态解析其成员，需显式允许
+extension-pkg-allow-list = [
+    "PySide6.QtCore",
+    "PySide6.QtGui",
+    "PySide6.QtWidgets",
+]
+
+[tool.pylint.format]
+max-line-length = 100
+
+[tool.pylint."messages control"]
+disable = [
+    "missing-function-docstring",
+    "too-few-public-methods",
+    "duplicate-code",
+]
+
+[tool.pylint.design]
+# 实体类字段较多、查询方法筛选条件较多，属于数据映射层的正常形态，
+# 因此把默认阈值适度放宽，避免为"减少参数"而拆出无意义的参数对象。
+max-attributes = 15
+max-args = 14
+max-positional-arguments = 14
+max-locals = 18
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
