@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+from PySide6.QtGui import QColor, QPalette
 from PySide6.QtWidgets import QApplication
 
 PRIMARY = "#2f6fed"
@@ -62,6 +63,25 @@ QLineEdit, QComboBox, QDateEdit, QSpinBox, QPlainTextEdit {{
 }}
 QLineEdit:focus, QComboBox:focus, QDateEdit:focus, QPlainTextEdit:focus {{
     border-color: {PRIMARY};
+}}
+/* 下拉弹出列表：不显式设置时在深色系统主题下会变成黑底黑字 */
+QComboBox QAbstractItemView {{
+    background-color: #ffffff;
+    color: {TEXT};
+    border: 1px solid {BORDER};
+    border-radius: 6px;
+    padding: 4px;
+    outline: 0;
+    selection-background-color: #e6efff;
+    selection-color: {TEXT};
+}}
+QComboBox QAbstractItemView::item {{
+    min-height: 26px;
+    padding: 3px 10px;
+    border-radius: 4px;
+}}
+QComboBox QAbstractItemView::item:hover {{
+    background-color: #eef4ff;
 }}
 QTableWidget {{
     background: #ffffff;
@@ -143,6 +163,30 @@ QLabel#amount {{
 
 
 def apply_theme(application: QApplication) -> None:
-    """把样式表应用到整个应用。"""
+    """把样式表与浅色调色板应用到整个应用。
+
+    Windows 处于深色主题时，Qt 的默认调色板是深色的；样式表只覆盖控件自身，
+    下拉列表的弹出视图、日历等仍按调色板绘制，于是出现“黑底黑字”。
+    这里显式设置一套浅色调色板，配合样式表消除该问题。
+    """
     application.setStyle("Fusion")
+    application.setPalette(_light_palette())
     application.setStyleSheet(APP_QSS)
+
+
+def _light_palette() -> QPalette:
+    """构造浅色调色板。"""
+    palette = QPalette()
+    palette.setColor(QPalette.ColorRole.Window, QColor(BACKGROUND))
+    palette.setColor(QPalette.ColorRole.WindowText, QColor(TEXT))
+    palette.setColor(QPalette.ColorRole.Base, QColor("#ffffff"))
+    palette.setColor(QPalette.ColorRole.AlternateBase, QColor("#f7f9fc"))
+    palette.setColor(QPalette.ColorRole.Text, QColor(TEXT))
+    palette.setColor(QPalette.ColorRole.Button, QColor("#ffffff"))
+    palette.setColor(QPalette.ColorRole.ButtonText, QColor(TEXT))
+    palette.setColor(QPalette.ColorRole.ToolTipBase, QColor("#ffffff"))
+    palette.setColor(QPalette.ColorRole.ToolTipText, QColor(TEXT))
+    palette.setColor(QPalette.ColorRole.Highlight, QColor("#dbe8ff"))
+    palette.setColor(QPalette.ColorRole.HighlightedText, QColor(TEXT))
+    palette.setColor(QPalette.ColorRole.PlaceholderText, QColor(MUTED))
+    return palette

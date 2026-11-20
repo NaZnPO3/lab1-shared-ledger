@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from datetime import date
 from typing import Callable
@@ -13,6 +14,11 @@ from ledgershare.domain.validation import RecordInput
 from ledgershare.enums import Role, TxnType
 from ledgershare.models import Category, Ledger, TransactionRecord, User
 from ledgershare.services.context import AppContext
+
+# 界面用例使用无显示器平台，必须在任何 Qt 模块被导入之前设置。
+# 这里导入的业务模块都不依赖 Qt，因此放在其后不影响生效。
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+os.environ.setdefault("QT_QPA_FONTDIR", r"C:\Windows\Fonts")
 
 
 @pytest.fixture()

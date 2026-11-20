@@ -6,7 +6,11 @@
 |---|---|---|---|
 | 实验一 | 需求分析 | `requirements.md`（REQ-001 ~ REQ-026） | `lab1-final` |
 | 实验二 | 软件设计与建模 | `uml/`、`ui/`、`UI界面/` | `lab2-final` |
-| 实验三 | 软件实现与构建 | `code/`、`docs/screenshots/` | `lab3-final` |
+| 实验三 | 软件实现与构建 | `code/`、`docs/screenshots/` | `lab3-ai-draft`（进行中，尚未定稿） |
+
+标签约定：`*-ai-draft` 表示该阶段由大模型生成或辅助完成的草稿，`*-final` 表示本人
+逐行复核后定稿。实验三目前只到草稿状态，复核与报告完成后才会打 `lab3-final`。
+
 
 ## 目录结构
 

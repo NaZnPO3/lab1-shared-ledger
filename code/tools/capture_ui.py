@@ -31,6 +31,7 @@ from ledgershare.enums import Role, TxnType  # noqa: E402
 from ledgershare.services.context import AppContext  # noqa: E402
 from ledgershare.ui.login_window import LoginWindow  # noqa: E402
 from ledgershare.ui.main_window import MainWindow  # noqa: E402
+from ledgershare.ui.record_dialog import RecordDialog  # noqa: E402
 from ledgershare.ui.theme import apply_theme  # noqa: E402
 
 OUTPUT_DIR = CODE_DIR.parent / "docs" / "screenshots"
@@ -142,8 +143,14 @@ def main() -> int:
                 application.processEvents()
             capture(window, name)
 
+        categories = context.ledgers.list_categories(ids["owner"], ids["ledger_id"])
+        dialog = RecordDialog(None, categories, title="记一笔")
+        dialog.show()
+        application.processEvents()
+        capture(dialog, "08-记账对话框")
+        dialog.close()
+
         window.close()
-        _ = ids
     finally:
         context.close()
     return 0

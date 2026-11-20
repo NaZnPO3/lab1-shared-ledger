@@ -24,6 +24,7 @@ from ..money import format_cents
 from .helpers import (
     FAILED,
     add_combo_item,
+    combo_enum,
     confirm,
     fill_table,
     guard,
@@ -72,7 +73,7 @@ class InviteDialog(QDialog):
 
     def role(self) -> Role:
         """返回选择的角色。"""
-        return self.role_combo.currentData()
+        return combo_enum(self.role_combo, Role, Role.MEMBER)
 
 
 class MembersTab(QWidget):
@@ -204,7 +205,7 @@ class MembersTab(QWidget):
         dialog.setWindowTitle("调整角色")
         dialog.username_edit.setText(target.username)
         dialog.username_edit.setEnabled(False)
-        index = dialog.role_combo.findData(target.role)
+        index = dialog.role_combo.findData(target.role.value)
         if index >= 0:
             dialog.role_combo.setCurrentIndex(index)
         if dialog.exec() != QDialog.DialogCode.Accepted:

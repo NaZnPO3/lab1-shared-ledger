@@ -24,6 +24,7 @@ from ..money import format_cents
 from .helpers import (
     FAILED,
     add_combo_item,
+    combo_enum,
     confirm,
     fill_table,
     guard,
@@ -153,8 +154,8 @@ class RecordsTab(QWidget):
         window = self.window
         if window.ledger is None or window.user is None:
             return
-        status = self.status_combo.currentData()
-        txn_type = self.type_combo.currentData()
+        status = combo_enum(self.status_combo, RecordStatus)
+        txn_type = combo_enum(self.type_combo, TxnType)
         keyword = self.keyword_edit.text().strip()
         date_from = date_to = None
         if self.date_filter.isChecked():

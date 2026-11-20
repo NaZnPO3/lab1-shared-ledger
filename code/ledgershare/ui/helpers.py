@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from enum import Enum
 from typing import Any, Callable, Sequence
 
 from PySide6.QtCore import Qt
@@ -120,3 +121,31 @@ def combo_value(combo: QComboBox, default: Any = None) -> Any:
     """读取下拉框当前项的值。"""
     data = combo.currentData()
     return default if data is None else data
+
+
+def combo_enum(
+    combo: QComboBox, enum_cls: type[Enum], default: Any = None
+) -> Any:
+    """读取下拉框中的枚举值。
+
+    Qt 会把 ``str`` 子类的枚举（本项目所有枚举都继承 ``str``）在存入 ``userData``
+    时转成普通字符串，``currentData()`` 拿回来的不再是枚举实例。因此统一在读取处
+    用枚举构造器还原，避免各处再出现 ``'str' object has no attribute 'value'``。
+
+    Args:
+        combo: 下拉框。
+        enum_cls: 期望的枚举类型。
+        default: 没有选中项或取值非法时返回的默认值。
+
+    Returns:
+        枚举实例或默认值。
+    """
+    data = combo.currentData()
+    if data is None:
+        return default
+    if isinstance(data, enum_cls):
+        return data
+    try:
+        return enum_cls(data)
+    except ValueError:
+        return default

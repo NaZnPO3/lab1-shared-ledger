@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
 from ..domain.validation import RecordInput
 from ..enums import TxnType
 from ..models import Category
+from .helpers import combo_enum
 
 
 class RecordDialog(QDialog):
@@ -95,17 +96,17 @@ class RecordDialog(QDialog):
 
     def _populate_categories(self) -> None:
         """按当前收支类型过滤可选分类。"""
-        txn_type = self.type_combo.currentData()
+        txn_type = combo_enum(self.type_combo, TxnType)
         self.category_combo.clear()
         for category in self._categories:
-            if category.applies_to is txn_type:
+            if txn_type is not None and category.applies_to is txn_type:
                 self.category_combo.addItem(category.name, category.category_id)
 
     def _apply_initial(self) -> None:
         """用已有数据回填，用于"修改被驳回的记录"。"""
         if self._initial is None:
             return
-        index = self.type_combo.findData(TxnType(self._initial.txn_type))
+        index = self.type_combo.findData(self._initial.txn_type)
         if index >= 0:
             self.type_combo.setCurrentIndex(index)
         self._populate_categories()
@@ -119,9 +120,10 @@ class RecordDialog(QDialog):
     # ------------------------------------------------------------------ 结果
     def value(self) -> RecordInput:
         """读取用户填写的内容。"""
+        txn_type = combo_enum(self.type_combo, TxnType, TxnType.EXPENSE)
         return RecordInput(
             amount=self.amount_edit.text().strip(),
-            txn_type=self.type_combo.currentData().value,
+            txn_type=txn_type.value,
             category_id=str(self.category_combo.currentData() or ""),
             occurred_on=self.date_edit.date().toString("yyyy-MM-dd"),
             note=self.note_edit.toPlainText().strip(),
