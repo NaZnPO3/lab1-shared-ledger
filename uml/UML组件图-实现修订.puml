@@ -1,0 +1,83 @@
+@startuml UML组件图-实现修订
+' 多人共享记账系统 —— 实验三实现后的分层组件图
+' 与实验二组件图的差异：实现按"轻量级 Windows 桌面"收敛为单进程四层，
+' 取消 API 网关与独立服务进程，但保留「权限集中校验」与「日志只追加」两条约束。
+skinparam defaultFontName "Microsoft YaHei"
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam nodesep 22
+skinparam ranksep 45
+top to bottom direction
+
+package "表现层（PySide6 单进程）" as PL {
+  [界面\n登录 · 记录 · 审核\n统计 · 结算 · 成员 · 日志] as UI
+}
+
+package "应用服务层" as SVC {
+  [认证服务\nAuthService] as S_AUTH
+  [账本与成员\nLedgerService] as S_LEDGER
+  [记录服务\nRecordService] as S_RECORD
+  [审核与更正\nReviewService] as S_REVIEW
+  [统计服务\nStatsService] as S_STATS
+  [结算服务\nSettlementService] as S_SETTLE
+  [日志服务\nLogService] as S_LOG
+  [幂等执行器\nIdempotencyExecutor] as S_IDEM
+}
+
+package "领域层（不依赖数据库与界面）" as DOMAIN {
+  [权限矩阵\npermissions] as D_PERM
+  [记录状态机\nstate_machine] as D_SM
+  [校验与金额\nvalidation · money] as D_VAL
+}
+
+package "数据访问层" as DAL {
+  [Database\n连接 · 事务 · 保存点] as D_DB
+  [仓储\nRepositories] as D_REPO
+  [建表 SQL\nschema] as D_SCHEMA
+}
+
+database "SQLite 单文件库\n账本 / 记录 / 结算 / 日志 / 幂等键" as DB
+
+UI --> S_AUTH
+UI --> S_LEDGER
+UI --> S_RECORD
+UI --> S_REVIEW
+UI --> S_STATS
+UI --> S_SETTLE
+UI --> S_LOG
+
+S_RECORD --> S_IDEM : 新增 / 更正幂等
+S_REVIEW --> S_IDEM
+
+S_AUTH --> D_REPO
+S_LEDGER --> D_REPO
+S_RECORD --> D_REPO
+S_REVIEW --> D_REPO
+S_STATS --> D_REPO
+S_SETTLE --> D_REPO
+S_LOG --> D_REPO
+
+S_LEDGER ..> D_PERM : 权限判定
+S_RECORD ..> D_PERM
+S_REVIEW ..> D_PERM
+S_SETTLE ..> D_PERM
+S_RECORD ..> D_SM : 状态迁移
+S_REVIEW ..> D_SM
+S_RECORD ..> D_VAL : 金额与字段校验
+S_REVIEW ..> D_VAL
+
+D_REPO --> D_DB
+D_DB --> D_SCHEMA : 首次建表
+D_DB --> DB : 读写
+
+note right of S_IDEM
+  同一幂等键的重复提交只返回首次结果，
+  不新增业务记录与操作日志（REQ-016）
+end note
+
+note bottom of D_REPO
+  越权日志写在独立事务中，
+  业务回滚不会带走日志（REQ-018、REQ-020）
+end note
+
+@enduml

@@ -1,0 +1,149 @@
+@startuml UML类图-实现修订
+' 多人共享记账系统 —— 实验三实现后的类图
+' 与实验二类图的差异在文末 note 中说明；字段名与代码中的实体属性保持一致。
+skinparam defaultFontName "Microsoft YaHei"
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam nodesep 45
+skinparam ranksep 55
+hide circle
+hide empty members
+
+class User {
+  - userId : String
+  - username : String
+  - displayName : String
+  - passwordHash : String
+  - salt : String
+  + 注册()
+  + 登录()
+}
+
+class Ledger {
+  - ledgerId : String
+  - name : String
+  - amountLimitCents : long
+  - createdBy : String
+  - nextPeriodSeq : int
+  + 创建账本()
+  + 设置金额上限()
+}
+
+class Member {
+  - memberId : String
+  - ledgerId : String
+  - userId : String
+  - role : 创建者/管理员/成员/只读
+  - status : 在册/已退出
+  + 变更角色()
+  + 退出账本()
+}
+
+class Category {
+  - categoryId : String
+  - ledgerId : String
+  - name : String
+  - appliesTo : 收入/支出
+}
+
+class TransactionRecord {
+  - recordId : String
+  - ledgerId : String
+  - periodId : String
+  - memberId : String
+  - categoryId : String
+  - amountCents : long
+  - txnType : 收入/支出
+  - occurredOn : Date
+  - note : String
+  - status : RecordStatus
+  - correctsRecordId : String
+  - version : int
+  + 提交()
+  + 撤回()
+  + 修改后重提()
+  + 审核通过()
+  + 审核驳回()
+  + 作废()
+}
+
+class SettlementPeriod {
+  - periodId : String
+  - ledgerId : String
+  - seq : int
+  - startDate : Date
+  - endDate : Date
+  - status : 进行中/已结算
+  + 结算()
+  + 锁定()
+}
+
+class SettlementLine {
+  - settlementId : String
+  - periodId : String
+  - memberId : String
+  - paidCents : long
+  - shareCents : long
+  - balanceCents : long
+}
+
+class OperationLog {
+  - logId : String
+  - ledgerId : String
+  - actorUserId : String
+  - action : LogAction
+  - targetType : String
+  - targetId : String
+  - result : 成功/已拒绝/失败
+  - detail : String
+  + 记录()
+  + 查询()
+}
+
+enum RecordStatus {
+  待审核
+  已审核
+  已驳回
+  已撤回
+  已作废
+}
+
+class Budget <<未实现>> {
+  - budgetId : String
+  - 周期 : 月/季
+  - 限额 : Decimal
+}
+
+User "1" -- "0..*" Member : 参与
+Ledger "1" -- "1..*" Member : 拥有
+Member "1" -- "0..*" TransactionRecord : 记录
+Ledger "1" -- "0..*" TransactionRecord : 归属
+Ledger "1" -- "0..*" Category : 维护
+Category "1" -- "0..*" TransactionRecord : 归类
+Ledger "1" -- "0..*" SettlementPeriod : 划分
+SettlementPeriod "1" -- "0..*" TransactionRecord : 包含
+SettlementPeriod "1" -- "0..*" SettlementLine : 汇总
+Member "1" -- "0..*" SettlementLine : 应收付
+Ledger "1" -- "0..1" Budget : 设置
+TransactionRecord "0..1" --> "0..1" TransactionRecord : 更正原记录
+TransactionRecord "1" -- "0..*" OperationLog : 留痕
+TransactionRecord ..> RecordStatus
+
+note bottom of Budget
+  REQ-012 状态为"待确认"，
+  按"只实现已确认需求"的范围决策未实现
+end note
+
+note right of TransactionRecord
+  periodId：记录所属结算周期（REQ-025）
+  correctsRecordId：更正指向的原记录（REQ-010）
+  version：乐观锁版本号（REQ-017）
+end note
+
+note bottom of SettlementLine
+  实验二类图没有结算结果对象；
+  实现时新增，承载每位成员的
+  垫付 / 应分摊 / 应收付
+end note
+
+@enduml

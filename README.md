@@ -15,6 +15,7 @@ lab1-shared-ledger/
 ├── requirements.md            实验一需求基线（REQ-001 ~ REQ-026）
 ├── chat.txt                   需求访谈记录素材
 ├── uml/                       实验二 UML：类图 / 组件图 / 用例图 / 时序图（.puml + .png）
+│                              └ 含 *-实现修订：按实验三实现回写的类图与组件图
 ├── ui/                        实验二界面原型（HTML + CSS）
 ├── UI界面/                    实验二界面草图（JPEG）
 ├── report/                    实验一、实验二报告
@@ -59,3 +60,18 @@ python build.py                       # 打包 dist/LedgerShare.exe
 * 越权日志写在独立事务中，业务回滚不会带走日志，对应 REQ-018。
 
 需求覆盖、结算分摊规则、并发与幂等实现细节见 [`code/README.md`](code/README.md)。
+
+### 设计回写
+
+实验三实现完成后，按实际情况回写了两张图（与实验二原图并存，便于对比）：
+
+| 文件 | 与实验二原图的差异 |
+|---|---|
+| `uml/UML类图-实现修订.puml` | 字段名与代码实体一致；`TransactionRecord` 增加 `periodId`（REQ-025）、`correctsRecordId`（REQ-010）、`version`（REQ-017）；新增 `SettlementLine` 承载每人的垫付/应分摊/应收付；`Budget` 标注为未实现 |
+| `uml/UML组件图-实现修订.puml` | 取消 API 网关与独立服务进程，收敛为「表现层 → 应用服务层 → 领域层 / 数据访问层 → SQLite」四层；保留权限集中校验、幂等执行器与日志只追加 |
+
+重新渲染命令（PlantUML 放在仓库外的 `实验工具/plantuml.jar`）：
+
+```powershell
+java -jar plantuml.jar -charset UTF-8 -tpng uml/*-实现修订.puml
+```
