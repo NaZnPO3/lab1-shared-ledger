@@ -3,7 +3,10 @@
 
 from __future__ import annotations
 
+import traceback
+from datetime import datetime
 from enum import Enum
+from pathlib import Path
 from typing import Any, Callable, Sequence
 
 from PySide6.QtCore import Qt
@@ -17,6 +20,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..config import default_data_dir
 from ..errors import LedgerError
 
 #: 表示 ``guard`` 执行失败（区别于函数本来返回 None）。
@@ -34,6 +38,27 @@ def show_info(parent: QWidget | None, text: str) -> None:
     QMessageBox.information(parent, "提示", text)
 
 
+def error_log_path() -> Path:
+    """返回错误日志文件位置。"""
+    return default_data_dir() / "error.log"
+
+
+def report_unexpected(exc: BaseException, tb: object | None = None) -> Path:
+    """把未预期异常的完整栈写入日志文件，返回日志路径。
+
+    打包成窗口程序后没有控制台，异常栈只能落到文件里，否则用户和开发者都无从查起。
+    """
+    path = error_log_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    detail = "".join(traceback.format_exception(type(exc), exc, tb)) if tb else "".join(
+        traceback.format_exception(type(exc), exc, exc.__traceback__)
+    )
+    stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(f"\n===== {stamp} =====\n{detail}")
+    return path
+
+
 def confirm(parent: QWidget | None, text: str) -> bool:
     """询问用户是否继续。"""
     answer = QMessageBox.question(
@@ -49,11 +74,24 @@ def confirm(parent: QWidget | None, text: str) -> bool:
 def guard(
     parent: QWidget | None, func: Callable[..., Any], *args: Any, **kwargs: Any
 ) -> Any:
-    """执行一次业务调用，失败时弹窗并返回 :data:`FAILED`。"""
+    """执行一次业务调用，失败时弹窗并返回 :data:`FAILED`。
+
+    业务异常按提示文案展示；未预期的异常（打包缺库、编码问题等）也会弹窗并
+    写入错误日志，绝不让按钮"点了没反应"——窗口模式下 stderr 是不可见的。
+    """
     try:
         return func(*args, **kwargs)
     except LedgerError as exc:
         show_error(parent, exc)
+        return FAILED
+    except Exception as exc:  # noqa: BLE001  pylint: disable=broad-exception-caught
+        report_unexpected(exc)
+        QMessageBox.critical(
+            parent,
+            "程序异常",
+            f"发生了未预期的错误：\n{type(exc).__name__}: {exc}\n\n"
+            f"详细信息已写入：\n{error_log_path()}",
+        )
         return FAILED
 
 

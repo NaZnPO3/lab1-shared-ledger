@@ -17,17 +17,31 @@ python main.py
 验证与质量检查：
 
 ```powershell
-python -m pytest -q                      # 87 个测试（含 5 个界面回归用例）
+python -m pytest -q                      # 89 个测试（含界面回归与打包自检用例）
 python -m pylint ledgershare tests tools # 代码风格检查，当前 10.00/10
 python tools/capture_ui.py               # 生成界面截图到 ../docs/screenshots
 ```
 
-打包成单文件 exe：
+## 打包与自检
 
 ```powershell
-python -m PyInstaller --noconfirm --clean --onefile --windowed `
-    --name LedgerShare --paths . main.py
+python build.py              # 单文件产物 dist/LedgerShare.exe
+python build.py --console    # 带控制台，便于排查启动问题
+
+dist\LedgerShare.exe --selftest                      # 自检，结果写 %LOCALAPPDATA%\LedgerShare\selftest.log
+dist\LedgerShare.exe --selftest D:\tmp\selftest.log  # 指定日志位置
 ```
+
+`build.py` 会比直接调用 PyInstaller 多做两件事，都是 conda 环境特有的坑：
+
+| 缺什么 | 症状 |
+|---|---|
+| `sqlite3.dll` | 启动即报 `ImportError: DLL load failed while importing _sqlite3` |
+| `libcrypto-3-x64.dll` / `libssl-3-x64.dll` | 程序能启动，但**注册和登录静默失败**：`hashlib` 退回纯 Python 实现，`pbkdf2_hmac` 不存在 |
+
+第二种尤其隐蔽：`--windowed` 模式没有控制台，异常栈不可见，表现为"按钮点了没反应"。
+因此程序额外做了两件事：`guard()` 捕获一切异常并弹窗 + 写入
+`%LOCALAPPDATA%\LedgerShare\error.log`；`--selftest` 可无人值守验证整条链路。
 
 ## 目录结构
 

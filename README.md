@@ -38,9 +38,10 @@ lab1-shared-ledger/
 cd code
 python -m pip install -r requirements.txt
 python main.py                        # 启动桌面程序
-python -m pytest                      # 87 个测试全部通过
+python -m pytest                      # 89 个测试全部通过
 python -m pylint ledgershare tests tools   # 代码风格检查 10.00/10
 python build.py                       # 打包 dist/LedgerShare.exe
+dist\LedgerShare.exe --selftest       # 打包后自检（注册/登录/记账/审核/结算）
 ```
 
 技术栈：Python 3.13 + PySide6 + SQLite，单机多账号，一个数据库文件即可共享账本。
